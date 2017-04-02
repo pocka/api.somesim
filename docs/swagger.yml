@@ -1,0 +1,388 @@
+swagger: '2.0'
+
+info:
+  version: "1.0.0"
+  title: Somesim
+  description: |
+    # 概要
+    MoE用染色シミュレータ「そめしむ」のバックエンドAPI.
+
+#host: api.somesim.pocka.io
+basePath: /v1
+
+produces:
+  - application/json
+
+tags:
+  -
+    name: Flower
+    description: 花びらの色情報を取得・管理する
+  -
+    name: Item
+    description: 染色対象の装備の情報や画像を取得・管理する
+  -
+    name: InternalAPI
+    description: スキーマやドキュメントを参照する
+
+paths:
+  /flowers:
+    get:
+      tags:
+        - Flower
+      summary: 花びら定義の取得
+      description: |
+        花びら定義を取得する
+
+        花びらのカテゴリによる絞り込みが可能(e.g. ラーファン, 課金花びら)
+      parameters:
+        -
+          name: category
+          in: query
+          description: 花びらのカテゴリ
+          required: false
+          type: string
+      responses:
+        200:
+          description: 花びら定義
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Flower'
+    post:
+      tags:
+        - Flower
+      summary: 花びら定義の追加
+      description: |
+        花びらの定義を追加する
+        指定されたカテゴリが存在しなければカテゴリを新規作成する
+      parameters:
+        -
+          name: body
+          in: body
+          description: 追加する花びら定義
+          required: true
+          schema:
+            $ref: '#/definitions/Flower'
+      responses:
+        201:
+          description: 追加に成功
+        409:
+          description: 指定された名前の花びらが既に存在する
+  '/flowers/{name}':
+    get:
+      tags:
+        - Flower
+      summary: 指定された名前の花びら定義を取得
+      description: |
+        名前を指定して花びら定義を取得する
+      parameters:
+        -
+          name: name
+          in: path
+          description: 花びらの名前
+          required: true
+          type: string
+      responses:
+        200:
+          description: 花びら定義
+          schema:
+            $ref: '#/definitions/Flower'
+        404:
+          description: 指定された花びら定義が存在しない
+    put:
+      tags:
+        - Flower
+      summary: 花びら定義を更新
+      description: |
+        指定した名前の花びら定義を更新する
+      parameters:
+        -
+          name: name
+          in: path
+          description: 更新したい花びらの名前
+          required: true
+          type: string
+        -
+          name: body
+          in: body
+          description: 上書きする内容
+          required: true
+          schema:
+            $ref: '#/definitions/Flower'
+      responses:
+        204:
+          description: 更新に成功
+        404:
+          description: 指定された名前の花びらが存在しない
+  /items:
+    get:
+      tags:
+        - Item
+      summary: 装備情報を取得
+      description: |
+        装備情報を取得する
+
+        カテゴリによる絞り込みが可能(e.g. グラフィック装備, 生産装備(裁縫))
+      parameters:
+        -
+          name: category
+          in: query
+          description: 装備のカテゴリ
+          required: false
+          type: string
+      responses:
+        200:
+          description: 装備情報
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Item'
+    post:
+      tags:
+        - Item
+      summary: 装備情報を追加
+      description: |
+        装備情報を新たに追加する
+      parameters:
+        -
+          name: body
+          in: body
+          description: 追加したい装備情報
+          required: true
+          schema:
+            $ref: '#/definitions/Item'
+      responses:
+        201:
+          description: 作成に成功
+        409:
+          description: 同じ名前の装備情報が既に存在する
+  '/items/{name}':
+    get:
+      tags:
+        - Item
+      summary: 指定した名前の装備情報を取得
+      description: |
+        名前を指定して装備情報を取得する
+      parameters:
+        -
+          name: name
+          in: path
+          description: 取得したい装備情報の名前
+          required: true
+          type: string
+      responses:
+        200:
+          description: 指定した名前の装備情報
+          schema:
+            $ref: '#/definitions/Item'
+        404:
+          description: 指定された名前の装備情報が存在しない
+    put:
+      tags:
+        - Item
+      summary: 装備情報を更新
+      description: |
+        指定された名前の装備情報を更新する
+      parameters:
+        -
+          name: name
+          in: path
+          description: 更新したい装備の名前
+          required: true
+          type: string
+        -
+          name: body
+          in: body
+          description: 更新したい内容
+          required: true
+          schema:
+            $ref: '#/definitions/Item'
+      responses:
+        204:
+          description: 更新に成功した
+        404:
+          description: 指定された名前の装備情報が存在しない
+  '/items/{name}/images':
+    get:
+      tags:
+        - Item
+      summary: 染色用画像を取得
+      description: |
+        装備名を指定して染色用画像を取得する
+      parameters:
+        -
+          name: name
+          in: path
+          description: 装備名
+          required: true
+          type: string
+      responses:
+        200:
+          description: |
+            その装備に登録されている全ての染色用画像セット
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ImageSet'
+    post:
+      tags:
+        - Item
+      summary: 染色用画像を追加
+      description: |
+        指定された名前の装備に新しい装備画像セットを追加
+
+        e.g. ハイキャスター装備にNFの画像セットを追加
+      parameters:
+        -
+          name: name
+          in: path
+          description: 装備名
+          required: true
+          type: string
+        -
+          name: body
+          in: body
+          description: 装備画像セット
+          required: true
+          schema:
+            $ref: '#/definitions/ImageSet'
+      responses:
+        201:
+          description: 追加に成功した
+        409:
+          description: 指定された名前の装備画像セットが既に存在する
+  '/items/{name}/images/{image_name}':
+    get:
+      tags:
+        - Item
+      summary: 名前を指定して染色用画像を取得
+      description: |
+        指定された名前の装備の画像セットの中から、
+        さらに名前を指定して画像セットを取得する
+      parameters:
+        -
+          name: name
+          in: path
+          description: 装備の名前
+          required: true
+          type: string
+        -
+          name: image_name
+          in: path
+          description: 画像セットの名前
+          required: true
+          type: string
+      responses:
+        200:
+          description: |
+            画像セット
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ImageSet'
+        404:
+          description: 指定された名前の画像セットが存在しない
+    put:
+      tags:
+        - Item
+      summary: 染色用画像を更新
+      description: |
+        染色用画像を更新する
+      parameters:
+        -
+          name: name
+          in: path
+          description: 更新する染色用画像がある装備名
+          required: true
+          type: string
+        -
+          name: image_name
+          in: path
+          description: 更新したい染色用画像の名前
+          required: true
+          type: string
+      responses:
+        204:
+          description: 更新に成功
+        404:
+          description: 指定された名前の染色用画像が存在しない
+  /docs/swagger.yml:
+    get:
+      tags:
+        - InternalAPI
+      description: |
+        Swaggerによるスキーマを取得する(YAML)
+      produces:
+        - text/plain
+      responses:
+        200:
+          description: |
+            スキーマ(Swagger)
+          schema:
+            type: string
+        404:
+          description: |
+            ファイルが存在しない
+  /docs:
+    get:
+      tags:
+        - InternalAPI
+      description: |
+        ReDocによるAPIドキュメントを取得する(HTML)
+      produces:
+        - text/html
+      responses:
+        200:
+          description: |
+            APIドキュメント(ReDoc)
+          schema:
+            type: string
+        404:
+          description: |
+            ファイルが存在しない
+
+definitions:
+  Flower:
+    description: 花びら定義
+    type: object
+    properties:
+      name:
+        description: 花びらの名前
+        type: string
+      category:
+        description: 花びらの所属するカテゴリ
+        type: string
+      red:
+        description: 赤色の値(%)
+        type: integer
+      green:
+        description: 緑色の値(%)
+        type: integer
+      blue:
+        description: 青色の値(%)
+        type: integer
+  Item:
+    description: 装備情報
+    type: object
+    properties:
+      name:
+        description: 装備の名前
+        type: string
+      images:
+        description: 装備画像セット
+        type: array
+        items:
+          $ref: '#/definitions/ImageSet'
+  ImageSet:
+    description: 装備画像セット(ベース画像とマスク画像のペア)
+    type: object
+    properties:
+      name:
+        description: 装備画像セットの名前
+        type: string
+      base_image:
+        description: Base64エンコードされたベース画像
+        type: string
+      mask_image:
+        description: Base64エンコードされたマスク画像
+        type: string
