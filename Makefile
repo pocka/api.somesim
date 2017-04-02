@@ -14,7 +14,7 @@ all:
 # Docker rules
 DOCKER_LABEL_DEVELOP = pocka/api.somesim-dev
 DOCKER_LABEL_SERVER = pocka/api.somesim
-DOCKER_RUN = docker run -v $(shell pwd):/work -u $(shell id -u):$(shell id -g)
+DOCKER_RUN = docker run --rm -v $(shell pwd)/src:/go/src/github.com/pocka/api.somesim -v $(shell pwd):/work -u $(shell id -u):$(shell id -g)
 
 ## Container creation
 .PHONY: container
@@ -25,18 +25,17 @@ container/develop: docker/develop/Dockerfile
 	docker build -t $(DOCKER_LABEL_DEVELOP) -f $< .
 
 .PHONY: container/server
-container/server: docker/server/Dockerfile
-	$(DOCKER_RUN) --entrypoint 'make' $(DOCKER_LABEL_DEVELOP) dist
-	docker build -t $(DOCKER_LABEL_SERVER) -f $< .
+container/server: docker/server/Dockerfile dist docs/index.html
+	docker build -t $(DOCKER_LABEL_SERVER):v1 -f $< .
 
 ## Run container
 .PHONY: run/develop
 run/develop:
-	-$(DOCKER_RUN) -it $(DOCKER_LABEL_DEVELOP)
+	-$(DOCKER_RUN) --entrypoint '/bin/sh' -it $(DOCKER_LABEL_DEVELOP)
 
 .PHONY: run/server
 run/server:
-	-docker run $(DOCKER_LABEL_SERVER)
+	-docker run --rm -p 8080:80 $(DOCKER_LABEL_SERVER):v1
 
 # Compile rules
 # !! DO NOT RUN THESE RULES IN THE OUTSIDE OF CONTAINER !!
@@ -44,9 +43,18 @@ run/server:
 dist: dist/somesim
 
 GO_FILES = $(shell find src -name "*.go")
-GO_BUILD = CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo
+GO_BUILD = go build -a -installsuffix netgo -tags netgo --ldflags '-extldflags "-static"'
 
 ## Build binary
 dist/somesim: $(GO_FILES)
-	$(GO_BUILD) -o $@ src/main.go
+	$(DOCKER_RUN) -e "CGO_ENABLED=0" -e "GOOS=linux" -w '/go/src/github.com/pocka/api.somesim' $(DOCKER_LABEL_DEVELOP) $(GO_BUILD) -o /work/$@ cmd/somesim-server/main.go
 	chmod +x $@
+
+# Swagger stuff
+.PHONY: swagger/validate
+swagger/validate: docs/swagger.yml
+	$(DOCKER_RUN) $(DOCKER_LABEL_DEVELOP) swagger validate $<
+
+.PHONY: swagger/generate
+swagger/generate: docs/swagger.yml
+	$(DOCKER_RUN) -w '/go/src/github.com/pocka/api.somesim' $(DOCKER_LABEL_DEVELOP) swagger generate server -f /work/$< -A somesim --exclude-main -t ./

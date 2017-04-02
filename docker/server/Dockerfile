@@ -4,6 +4,8 @@ MAINTAINER pocka <pockawoooh@gmail.com>
 
 ADD dist /work
 
+ADD docs /work/docs
+
 WORKDIR /work
 
-CMD ["/work/somesim"]
+ENTRYPOINT ["/work/somesim", "--port", "80", "--host", "0.0.0.0"]
