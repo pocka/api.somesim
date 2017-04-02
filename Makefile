@@ -38,7 +38,6 @@ run/server:
 	-docker run --rm -p 8080:80 $(DOCKER_LABEL_SERVER):v1
 
 # Compile rules
-# !! DO NOT RUN THESE RULES IN THE OUTSIDE OF CONTAINER !!
 
 dist: dist/somesim
 
