@@ -14,6 +14,7 @@ import (
 	"github.com/pocka/api.somesim/restapi/operations/flower"
 	"github.com/pocka/api.somesim/restapi/operations/internal_api"
 	"github.com/pocka/api.somesim/restapi/operations/item"
+	"github.com/pocka/api.somesim/restapi/operations/user"
 )
 
 // This file is safe to edit. Once it exists it will not be overwritten
@@ -80,23 +81,29 @@ func configureAPI(api *operations.SomesimAPI) http.Handler {
 	api.ItemGetItemsNameImagesImageNameHandler = item.GetItemsNameImagesImageNameHandlerFunc(func(params item.GetItemsNameImagesImageNameParams) middleware.Responder {
 		return middleware.NotImplemented("operation item.GetItemsNameImagesImageName has not yet been implemented")
 	})
-	api.FlowerPostFlowersHandler = flower.PostFlowersHandlerFunc(func(params flower.PostFlowersParams) middleware.Responder {
+	api.FlowerPostFlowersHandler = flower.PostFlowersHandlerFunc(func(params flower.PostFlowersParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation flower.PostFlowers has not yet been implemented")
 	})
-	api.ItemPostItemsHandler = item.PostItemsHandlerFunc(func(params item.PostItemsParams) middleware.Responder {
+	api.ItemPostItemsHandler = item.PostItemsHandlerFunc(func(params item.PostItemsParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation item.PostItems has not yet been implemented")
 	})
-	api.ItemPostItemsNameImagesHandler = item.PostItemsNameImagesHandlerFunc(func(params item.PostItemsNameImagesParams) middleware.Responder {
+	api.ItemPostItemsNameImagesHandler = item.PostItemsNameImagesHandlerFunc(func(params item.PostItemsNameImagesParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation item.PostItemsNameImages has not yet been implemented")
 	})
-	api.FlowerPutFlowersNameHandler = flower.PutFlowersNameHandlerFunc(func(params flower.PutFlowersNameParams) middleware.Responder {
+	api.FlowerPutFlowersNameHandler = flower.PutFlowersNameHandlerFunc(func(params flower.PutFlowersNameParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation flower.PutFlowersName has not yet been implemented")
 	})
-	api.ItemPutItemsNameHandler = item.PutItemsNameHandlerFunc(func(params item.PutItemsNameParams) middleware.Responder {
+	api.ItemPutItemsNameHandler = item.PutItemsNameHandlerFunc(func(params item.PutItemsNameParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation item.PutItemsName has not yet been implemented")
 	})
-	api.ItemPutItemsNameImagesImageNameHandler = item.PutItemsNameImagesImageNameHandlerFunc(func(params item.PutItemsNameImagesImageNameParams) middleware.Responder {
+	api.ItemPutItemsNameImagesImageNameHandler = item.PutItemsNameImagesImageNameHandlerFunc(func(params item.PutItemsNameImagesImageNameParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation item.PutItemsNameImagesImageName has not yet been implemented")
+	})
+	api.UserGetTokensHandler = user.GetTokensHandlerFunc(func(params user.GetTokensParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation user.GetTokensHandler has not yet been implemented")
+	})
+	api.UserGetTokensAccessTokenHandler = user.GetTokensAccessTokenHandlerFunc(func(params user.GetTokensAccessTokenParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation user.GetTokensAccessTokenHandler has not yet been implemented")
 	})
 
 	api.ServerShutdown = func() {}

@@ -10,16 +10,16 @@ import (
 )
 
 // PutItemsNameImagesImageNameHandlerFunc turns a function with the right signature into a put items name images image name handler
-type PutItemsNameImagesImageNameHandlerFunc func(PutItemsNameImagesImageNameParams) middleware.Responder
+type PutItemsNameImagesImageNameHandlerFunc func(PutItemsNameImagesImageNameParams, interface{}) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn PutItemsNameImagesImageNameHandlerFunc) Handle(params PutItemsNameImagesImageNameParams) middleware.Responder {
-	return fn(params)
+func (fn PutItemsNameImagesImageNameHandlerFunc) Handle(params PutItemsNameImagesImageNameParams, principal interface{}) middleware.Responder {
+	return fn(params, principal)
 }
 
 // PutItemsNameImagesImageNameHandler interface for that can handle valid put items name images image name params
 type PutItemsNameImagesImageNameHandler interface {
-	Handle(PutItemsNameImagesImageNameParams) middleware.Responder
+	Handle(PutItemsNameImagesImageNameParams, interface{}) middleware.Responder
 }
 
 // NewPutItemsNameImagesImageName creates a new http.Handler for the put items name images image name operation
@@ -44,12 +44,22 @@ func (o *PutItemsNameImagesImageName) ServeHTTP(rw http.ResponseWriter, r *http.
 	route, _ := o.Context.RouteInfo(r)
 	var Params = NewPutItemsNameImagesImageNameParams()
 
+	uprinc, err := o.Context.Authorize(r, route)
+	if err != nil {
+		o.Context.Respond(rw, r, route.Produces, route, err)
+		return
+	}
+	var principal interface{}
+	if uprinc != nil {
+		principal = uprinc
+	}
+
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
 
-	res := o.Handler.Handle(Params) // actually handle the request
+	res := o.Handler.Handle(Params, principal) // actually handle the request
 
 	o.Context.Respond(rw, r, route.Produces, route, res)
 

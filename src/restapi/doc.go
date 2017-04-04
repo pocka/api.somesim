@@ -6,8 +6,8 @@ MoE用染色シミュレータ「そめしむ」のバックエンドAPI.
 
 
     Schemes:
-      http
-    Host: localhost
+      https
+    Host: api.somesim.pocka.io
     BasePath: /v1
     Version: 1.0.0
 

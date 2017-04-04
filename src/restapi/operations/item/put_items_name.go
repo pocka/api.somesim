@@ -10,16 +10,16 @@ import (
 )
 
 // PutItemsNameHandlerFunc turns a function with the right signature into a put items name handler
-type PutItemsNameHandlerFunc func(PutItemsNameParams) middleware.Responder
+type PutItemsNameHandlerFunc func(PutItemsNameParams, interface{}) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn PutItemsNameHandlerFunc) Handle(params PutItemsNameParams) middleware.Responder {
-	return fn(params)
+func (fn PutItemsNameHandlerFunc) Handle(params PutItemsNameParams, principal interface{}) middleware.Responder {
+	return fn(params, principal)
 }
 
 // PutItemsNameHandler interface for that can handle valid put items name params
 type PutItemsNameHandler interface {
-	Handle(PutItemsNameParams) middleware.Responder
+	Handle(PutItemsNameParams, interface{}) middleware.Responder
 }
 
 // NewPutItemsName creates a new http.Handler for the put items name operation
@@ -44,12 +44,22 @@ func (o *PutItemsName) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, _ := o.Context.RouteInfo(r)
 	var Params = NewPutItemsNameParams()
 
+	uprinc, err := o.Context.Authorize(r, route)
+	if err != nil {
+		o.Context.Respond(rw, r, route.Produces, route, err)
+		return
+	}
+	var principal interface{}
+	if uprinc != nil {
+		principal = uprinc
+	}
+
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
 
-	res := o.Handler.Handle(Params) // actually handle the request
+	res := o.Handler.Handle(Params, principal) // actually handle the request
 
 	o.Context.Respond(rw, r, route.Produces, route, res)
 

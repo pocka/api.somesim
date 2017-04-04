@@ -25,6 +25,34 @@ tags:
   -
     name: InternalAPI
     description: スキーマやドキュメントを参照する
+  -
+    name: User
+    description: ユーザ管理関連(現状は起動時に設定されるadminユーザのみ)
+
+# 共通レスポンス
+responses:
+  401:
+    description: |
+      Basic認証の場合はAuthorizationヘッダがない
+
+      トークン認可の場合はAuthorizationヘッダがない、またはトークンが失効している
+    headers:
+      WWW-Authenticate:
+        description: |
+          Authorizationヘッダがない場合は`Bearer realm="header_required"`
+
+          トークンが失効している場合は`Bearer error="expired_token"`
+        type: string
+  400:
+    description: |
+      Basic認証の場合はユーザ名かパスワードが間違っている
+
+      トークン認可の場合はトークンが不正
+    headers:
+      WWW-Authenticate:
+        description: |
+          `Bearer error="invalid_request"`
+        type: string
 
 paths:
   /flowers:
@@ -57,6 +85,8 @@ paths:
       description: |
         花びらの定義を追加する
         指定されたカテゴリが存在しなければカテゴリを新規作成する
+      security:
+        - Bearer: []
       parameters:
         -
           name: body
@@ -97,6 +127,8 @@ paths:
       summary: 花びら定義を更新
       description: |
         指定した名前の花びら定義を更新する
+      security:
+        - Bearer: []
       parameters:
         -
           name: name
@@ -145,6 +177,8 @@ paths:
       summary: 装備情報を追加
       description: |
         装備情報を新たに追加する
+      security:
+        - Bearer: []
       parameters:
         -
           name: body
@@ -185,6 +219,8 @@ paths:
       summary: 装備情報を更新
       description: |
         指定された名前の装備情報を更新する
+      security:
+        - Bearer: []
       parameters:
         -
           name: name
@@ -234,6 +270,8 @@ paths:
         指定された名前の装備に新しい装備画像セットを追加
 
         e.g. ハイキャスター装備にNFの画像セットを追加
+      security:
+        - Bearer: []
       parameters:
         -
           name: name
@@ -290,6 +328,8 @@ paths:
       summary: 染色用画像を更新
       description: |
         染色用画像を更新する
+      security:
+        - Bearer: []
       parameters:
         -
           name: name
@@ -342,6 +382,46 @@ paths:
         404:
           description: |
             ファイルが存在しない
+  /tokens:
+    get:
+      tags:
+        - User
+      summary: アクセストークンとリフレッシュトークンを取得する
+      description: |
+        アクセストークンとリフレッシュトークンを取得する
+
+        ユーザ名/パスワードを渡すBASIC認証方式と
+        古いリフレッシュトークンを渡す更新方式がある
+      security:
+        - BasicAuth: []
+        - Bearer: []
+      responses:
+        200:
+          description: アクセストークンとリフレッシュトークン
+          schema:
+            type: object
+            properties:
+              access_token:
+                description: アクセストークン(JWT)
+                type: string
+              refresh_token:
+                description: リフレッシュトークン(JWT)
+                type: string
+  /tokens/access_token:
+    get:
+      tags:
+        - User
+      summary: アクセストークンを取得する
+      description: |
+        リフレッシュトークンを用いてアクセストークンを取得する
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: アクセストークン
+          schema:
+            description: アクセストークン(JWT)
+            type: string
 
 definitions:
   Flower:
@@ -388,3 +468,15 @@ definitions:
       mask_image:
         description: Base64エンコードされたマスク画像
         type: string
+
+securityDefinitions:
+  # Basic認証
+  # トークン取得にのみ使われ、リソースアクセスに関してはトークンを用いる
+  BasicAuth:
+    type: basic
+  # トークンを使ったアクセス
+  # HTTPヘッダに Authorization: Bearer <token> が必要となる
+  Bearer:
+    type: apiKey
+    in: header
+    name: Authorization

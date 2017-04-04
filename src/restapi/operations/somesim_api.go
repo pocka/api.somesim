@@ -13,6 +13,7 @@ import (
 	loads "github.com/go-openapi/loads"
 	runtime "github.com/go-openapi/runtime"
 	middleware "github.com/go-openapi/runtime/middleware"
+	security "github.com/go-openapi/runtime/security"
 	spec "github.com/go-openapi/spec"
 	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -20,6 +21,7 @@ import (
 	"github.com/pocka/api.somesim/restapi/operations/flower"
 	"github.com/pocka/api.somesim/restapi/operations/internal_api"
 	"github.com/pocka/api.somesim/restapi/operations/item"
+	"github.com/pocka/api.somesim/restapi/operations/user"
 )
 
 // NewSomesimAPI creates a new Somesim instance
@@ -62,24 +64,40 @@ func NewSomesimAPI(spec *loads.Document) *SomesimAPI {
 		ItemGetItemsNameImagesImageNameHandler: item.GetItemsNameImagesImageNameHandlerFunc(func(params item.GetItemsNameImagesImageNameParams) middleware.Responder {
 			return middleware.NotImplemented("operation ItemGetItemsNameImagesImageName has not yet been implemented")
 		}),
-		FlowerPostFlowersHandler: flower.PostFlowersHandlerFunc(func(params flower.PostFlowersParams) middleware.Responder {
+		UserGetTokensHandler: user.GetTokensHandlerFunc(func(params user.GetTokensParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation UserGetTokens has not yet been implemented")
+		}),
+		UserGetTokensAccessTokenHandler: user.GetTokensAccessTokenHandlerFunc(func(params user.GetTokensAccessTokenParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation UserGetTokensAccessToken has not yet been implemented")
+		}),
+		FlowerPostFlowersHandler: flower.PostFlowersHandlerFunc(func(params flower.PostFlowersParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation FlowerPostFlowers has not yet been implemented")
 		}),
-		ItemPostItemsHandler: item.PostItemsHandlerFunc(func(params item.PostItemsParams) middleware.Responder {
+		ItemPostItemsHandler: item.PostItemsHandlerFunc(func(params item.PostItemsParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation ItemPostItems has not yet been implemented")
 		}),
-		ItemPostItemsNameImagesHandler: item.PostItemsNameImagesHandlerFunc(func(params item.PostItemsNameImagesParams) middleware.Responder {
+		ItemPostItemsNameImagesHandler: item.PostItemsNameImagesHandlerFunc(func(params item.PostItemsNameImagesParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation ItemPostItemsNameImages has not yet been implemented")
 		}),
-		FlowerPutFlowersNameHandler: flower.PutFlowersNameHandlerFunc(func(params flower.PutFlowersNameParams) middleware.Responder {
+		FlowerPutFlowersNameHandler: flower.PutFlowersNameHandlerFunc(func(params flower.PutFlowersNameParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation FlowerPutFlowersName has not yet been implemented")
 		}),
-		ItemPutItemsNameHandler: item.PutItemsNameHandlerFunc(func(params item.PutItemsNameParams) middleware.Responder {
+		ItemPutItemsNameHandler: item.PutItemsNameHandlerFunc(func(params item.PutItemsNameParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation ItemPutItemsName has not yet been implemented")
 		}),
-		ItemPutItemsNameImagesImageNameHandler: item.PutItemsNameImagesImageNameHandlerFunc(func(params item.PutItemsNameImagesImageNameParams) middleware.Responder {
+		ItemPutItemsNameImagesImageNameHandler: item.PutItemsNameImagesImageNameHandlerFunc(func(params item.PutItemsNameImagesImageNameParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation ItemPutItemsNameImagesImageName has not yet been implemented")
 		}),
+
+		// Applies when the Authorization header is set with the Basic scheme
+		BasicAuthAuth: func(user string, pass string) (interface{}, error) {
+			return nil, errors.NotImplemented("basic auth  (BasicAuth) has not yet been implemented")
+		},
+
+		// Applies when the "Authorization" header is set
+		BearerAuth: func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (Bearer) Authorization from header param [Authorization] has not yet been implemented")
+		},
 	}
 }
 
@@ -104,6 +122,14 @@ type SomesimAPI struct {
 	// TxtProducer registers a producer for a "text/plain" mime type
 	TxtProducer runtime.Producer
 
+	// BasicAuthAuth registers a function that takes username and password and returns a principal
+	// it performs authentication with basic auth
+	BasicAuthAuth func(string, string) (interface{}, error)
+
+	// BearerAuth registers a function that takes a token and returns a principal
+	// it performs authentication based on an api key Authorization provided in the header
+	BearerAuth func(string) (interface{}, error)
+
 	// InternalAPIGetDocsHandler sets the operation handler for the get docs operation
 	InternalAPIGetDocsHandler internal_api.GetDocsHandler
 	// InternalAPIGetDocsSwaggerYmlHandler sets the operation handler for the get docs swagger yml operation
@@ -120,6 +146,10 @@ type SomesimAPI struct {
 	ItemGetItemsNameImagesHandler item.GetItemsNameImagesHandler
 	// ItemGetItemsNameImagesImageNameHandler sets the operation handler for the get items name images image name operation
 	ItemGetItemsNameImagesImageNameHandler item.GetItemsNameImagesImageNameHandler
+	// UserGetTokensHandler sets the operation handler for the get tokens operation
+	UserGetTokensHandler user.GetTokensHandler
+	// UserGetTokensAccessTokenHandler sets the operation handler for the get tokens access token operation
+	UserGetTokensAccessTokenHandler user.GetTokensAccessTokenHandler
 	// FlowerPostFlowersHandler sets the operation handler for the post flowers operation
 	FlowerPostFlowersHandler flower.PostFlowersHandler
 	// ItemPostItemsHandler sets the operation handler for the post items operation
@@ -203,6 +233,14 @@ func (o *SomesimAPI) Validate() error {
 		unregistered = append(unregistered, "TxtProducer")
 	}
 
+	if o.BasicAuthAuth == nil {
+		unregistered = append(unregistered, "BasicAuthAuth")
+	}
+
+	if o.BearerAuth == nil {
+		unregistered = append(unregistered, "AuthorizationAuth")
+	}
+
 	if o.InternalAPIGetDocsHandler == nil {
 		unregistered = append(unregistered, "internal_api.GetDocsHandler")
 	}
@@ -233,6 +271,14 @@ func (o *SomesimAPI) Validate() error {
 
 	if o.ItemGetItemsNameImagesImageNameHandler == nil {
 		unregistered = append(unregistered, "item.GetItemsNameImagesImageNameHandler")
+	}
+
+	if o.UserGetTokensHandler == nil {
+		unregistered = append(unregistered, "user.GetTokensHandler")
+	}
+
+	if o.UserGetTokensAccessTokenHandler == nil {
+		unregistered = append(unregistered, "user.GetTokensAccessTokenHandler")
 	}
 
 	if o.FlowerPostFlowersHandler == nil {
@@ -274,7 +320,21 @@ func (o *SomesimAPI) ServeErrorFor(operationID string) func(http.ResponseWriter,
 // AuthenticatorsFor gets the authenticators for the specified security schemes
 func (o *SomesimAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
 
-	return nil
+	result := make(map[string]runtime.Authenticator)
+	for name, scheme := range schemes {
+		switch name {
+
+		case "BasicAuth":
+			_ = scheme
+			result[name] = security.BasicAuth(o.BasicAuthAuth)
+
+		case "Bearer":
+
+			result[name] = security.APIKeyAuth(scheme.Name, scheme.In, o.BearerAuth)
+
+		}
+	}
+	return result
 
 }
 
@@ -384,6 +444,16 @@ func (o *SomesimAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/items/{name}/images/{image_name}"] = item.NewGetItemsNameImagesImageName(o.context, o.ItemGetItemsNameImagesImageNameHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/tokens"] = user.NewGetTokens(o.context, o.UserGetTokensHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/tokens/access_token"] = user.NewGetTokensAccessToken(o.context, o.UserGetTokensAccessTokenHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)

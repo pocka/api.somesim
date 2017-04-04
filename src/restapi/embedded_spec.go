@@ -15,12 +15,16 @@ func init() {
   "produces": [
     "application/json"
   ],
+  "schemes": [
+    "https"
+  ],
   "swagger": "2.0",
   "info": {
     "description": "# 概要\nMoE用染色シミュレータ「そめしむ」のバックエンドAPI.\n",
     "title": "Somesim",
     "version": "1.0.0"
   },
+  "host": "api.somesim.pocka.io",
   "basePath": "/v1",
   "paths": {
     "/docs": {
@@ -100,6 +104,11 @@ func init() {
           "Flower"
         ],
         "summary": "花びら定義の追加",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "parameters": [
           {
             "description": "追加する花びら定義",
@@ -155,6 +164,11 @@ func init() {
           "Flower"
         ],
         "summary": "花びら定義を更新",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "parameters": [
           {
             "type": "string",
@@ -216,6 +230,11 @@ func init() {
           "Item"
         ],
         "summary": "装備情報を追加",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "parameters": [
           {
             "description": "追加したい装備情報",
@@ -271,6 +290,11 @@ func init() {
           "Item"
         ],
         "summary": "装備情報を更新",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "parameters": [
           {
             "type": "string",
@@ -333,6 +357,11 @@ func init() {
           "Item"
         ],
         "summary": "染色用画像を追加",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "parameters": [
           {
             "type": "string",
@@ -405,6 +434,11 @@ func init() {
           "Item"
         ],
         "summary": "染色用画像を更新",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "parameters": [
           {
             "type": "string",
@@ -427,6 +461,64 @@ func init() {
           },
           "404": {
             "description": "指定された名前の染色用画像が存在しない"
+          }
+        }
+      }
+    },
+    "/tokens": {
+      "get": {
+        "description": "アクセストークンとリフレッシュトークンを取得する\n\nユーザ名/パスワードを渡すBASIC認証方式と\n古いリフレッシュトークンを渡す更新方式がある\n",
+        "tags": [
+          "User"
+        ],
+        "summary": "アクセストークンとリフレッシュトークンを取得する",
+        "security": [
+          {
+            "BasicAuth": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "アクセストークンとリフレッシュトークン",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "access_token": {
+                  "description": "アクセストークン(JWT)",
+                  "type": "string"
+                },
+                "refresh_token": {
+                  "description": "リフレッシュトークン(JWT)",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tokens/access_token": {
+      "get": {
+        "description": "リフレッシュトークンを用いてアクセストークンを取得する\n",
+        "tags": [
+          "User"
+        ],
+        "summary": "アクセストークンを取得する",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "アクセストークン",
+            "schema": {
+              "description": "アクセストークン(JWT)",
+              "type": "string"
+            }
           }
         }
       }
@@ -495,6 +587,36 @@ func init() {
       }
     }
   },
+  "responses": {
+    "400": {
+      "description": "Basic認証の場合はユーザ名かパスワードが間違っている\n\nトークン認可の場合はトークンが不正\n",
+      "headers": {
+        "WWW-Authenticate": {
+          "type": "string",
+          "description": "` + "`" + `Bearer error=\"invalid_request\"` + "`" + `\n"
+        }
+      }
+    },
+    "401": {
+      "description": "Basic認証の場合はAuthorizationヘッダがない\n\nトークン認可の場合はAuthorizationヘッダがない、またはトークンが失効している\n",
+      "headers": {
+        "WWW-Authenticate": {
+          "type": "string",
+          "description": "Authorizationヘッダがない場合は` + "`" + `Bearer realm=\"header_required\"` + "`" + `\n\nトークンが失効している場合は` + "`" + `Bearer error=\"expired_token\"` + "`" + `\n"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "BasicAuth": {
+      "type": "basic"
+    },
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
   "tags": [
     {
       "description": "花びらの色情報を取得・管理する",
@@ -507,6 +629,10 @@ func init() {
     {
       "description": "スキーマやドキュメントを参照する",
       "name": "InternalAPI"
+    },
+    {
+      "description": "ユーザ管理関連(現状は起動時に設定されるadminユーザのみ)",
+      "name": "User"
     }
   ]
 }`))
