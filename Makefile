@@ -10,6 +10,23 @@ default: all
 .PHONY: all
 all: container/server
 
+.PHONY: init
+init: .crt
+	mkdir -p dist
+
+CRT_DIR = $(shell pwd)/.crt
+CRT_NAME = testserver
+.crt:
+	mkdir -p .crt
+	cd /etc/pki/tls/certs && \
+	make $(CRT_DIR)/$(CRT_NAME).crt
+	openssl rsa -in $(CRT_DIR)/$(CRT_NAME).key -out $(CRT_DIR)/$(CRT_NAME).key
+	chmod +r .crt/*
+
+.PHONY: clean
+clean:
+	rm -rf .crt
+	rm -rf dist
 
 # Docker rules
 DOCKER_LABEL_DEVELOP = pocka/api.somesim-dev
@@ -26,10 +43,6 @@ container/develop: docker/develop/Dockerfile
 container/server: docker/server/Dockerfile dist docs/index.html
 	docker build -t $(DOCKER_LABEL_SERVER):v1 -f $< .
 
-.PHONY: container/testserver
-container/testserver: docker/testserver/Dockerfile container/server
-	docker build -t $(DOCKER_LABEL_TESTSERVER):v1 -f $< .
-
 ## Run container
 .PHONY: run/develop
 run/develop:
@@ -37,11 +50,7 @@ run/develop:
 
 .PHONY: run/server
 run/server:
-	-docker run --rm -p 8080:80 $(DOCKER_LABEL_SERVER):v1
-
-.PHONY: run/testserver
-run/testserver:
-	-docker run --rm -p 8080:80 $(DOCKER_LABEL_TESTSERVER):v1
+	-docker run --rm -v $(CRT_DIR):/work/.crt -p 8080:80 $(DOCKER_LABEL_SERVER):v1 --tls-certificate=/work/.crt/$(CRT_NAME).crt --tls-key=/work/.crt/$(CRT_NAME).key
 
 # Compile rules
 
