@@ -50,7 +50,7 @@ run/develop:
 
 .PHONY: run/server
 run/server:
-	-docker run --rm -v $(CRT_DIR):/work/.crt -p 8080:80 $(DOCKER_LABEL_SERVER):v1 --tls-certificate=/work/.crt/$(CRT_NAME).crt --tls-key=/work/.crt/$(CRT_NAME).key
+	-docker run --rm -v $(CRT_DIR):/work/.crt -p 8443:443 $(DOCKER_LABEL_SERVER):v1 --tls-certificate=/work/.crt/$(CRT_NAME).crt --tls-key=/work/.crt/$(CRT_NAME).key
 
 # Compile rules
 
