@@ -14,12 +14,10 @@ all: container/server
 # Docker rules
 DOCKER_LABEL_DEVELOP = pocka/api.somesim-dev
 DOCKER_LABEL_SERVER = pocka/api.somesim
+DOCKER_LABEL_TESTSERVER = pocka/api.somesim-test
 DOCKER_RUN = docker run --rm -v $(shell pwd)/src:/go/src/github.com/pocka/api.somesim -v $(shell pwd):/work -u $(shell id -u):$(shell id -g)
 
 ## Container creation
-.PHONY: container
-container: container/develop container/server
-
 .PHONY: container/develop
 container/develop: docker/develop/Dockerfile
 	docker build -t $(DOCKER_LABEL_DEVELOP) -f $< .
@@ -27,6 +25,10 @@ container/develop: docker/develop/Dockerfile
 .PHONY: container/server
 container/server: docker/server/Dockerfile dist docs/index.html
 	docker build -t $(DOCKER_LABEL_SERVER):v1 -f $< .
+
+.PHONY: container/testserver
+container/testserver: docker/testserver/Dockerfile container/server
+	docker build -t $(DOCKER_LABEL_TESTSERVER):v1 -f $< .
 
 ## Run container
 .PHONY: run/develop
@@ -36,6 +38,10 @@ run/develop:
 .PHONY: run/server
 run/server:
 	-docker run --rm -p 8080:80 $(DOCKER_LABEL_SERVER):v1
+
+.PHONY: run/testserver
+run/testserver:
+	-docker run --rm -p 8080:80 $(DOCKER_LABEL_TESTSERVER):v1
 
 # Compile rules
 
