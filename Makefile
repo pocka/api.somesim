@@ -8,7 +8,7 @@
 default: all
 
 .PHONY: all
-all:
+all: container/server
 
 
 # Docker rules
