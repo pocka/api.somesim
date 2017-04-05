@@ -50,7 +50,7 @@ run/develop:
 
 .PHONY: run/server
 run/server:
-	-docker run --rm -v $(CRT_DIR):/work/.crt -p 8080:80 $(DOCKER_LABEL_SERVER):v1 --scheme http
+	-docker run --rm -p 8080:80 $(DOCKER_LABEL_SERVER):v1
 
 # Compile rules
 
