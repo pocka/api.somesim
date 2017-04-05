@@ -58,18 +58,29 @@ func configureAPI(api *operations.SomesimAPI) http.Handler {
 
 	api.HTMLProducer = runtime.TextProducer()
 
+	// Internal APIs
 	api.InternalAPIGetDocsHandler = internal_api.GetDocsHandlerFunc(func(params internal_api.GetDocsParams) middleware.Responder {
 		return internal_api.GetStaticDocFile("index.html")
 	})
 	api.InternalAPIGetDocsSwaggerYmlHandler = internal_api.GetDocsSwaggerYmlHandlerFunc(func(params internal_api.GetDocsSwaggerYmlParams) middleware.Responder {
 		return internal_api.GetStaticDocFile("swagger.yml")
 	})
+
+	// Flower APIs
 	api.FlowerGetFlowersHandler = flower.GetFlowersHandlerFunc(func(params flower.GetFlowersParams) middleware.Responder {
 		return middleware.NotImplemented("operation flower.GetFlowers has not yet been implemented")
 	})
 	api.FlowerGetFlowersNameHandler = flower.GetFlowersNameHandlerFunc(func(params flower.GetFlowersNameParams) middleware.Responder {
 		return middleware.NotImplemented("operation flower.GetFlowersName has not yet been implemented")
 	})
+	api.FlowerPostFlowersHandler = flower.PostFlowersHandlerFunc(func(params flower.PostFlowersParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation flower.PostFlowers has not yet been implemented")
+	})
+	api.FlowerPutFlowersNameHandler = flower.PutFlowersNameHandlerFunc(func(params flower.PutFlowersNameParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation flower.PutFlowersName has not yet been implemented")
+	})
+
+	// Item APIs
 	api.ItemGetItemsHandler = item.GetItemsHandlerFunc(func(params item.GetItemsParams) middleware.Responder {
 		return middleware.NotImplemented("operation item.GetItems has not yet been implemented")
 	})
@@ -82,17 +93,11 @@ func configureAPI(api *operations.SomesimAPI) http.Handler {
 	api.ItemGetItemsNameImagesImageNameHandler = item.GetItemsNameImagesImageNameHandlerFunc(func(params item.GetItemsNameImagesImageNameParams) middleware.Responder {
 		return middleware.NotImplemented("operation item.GetItemsNameImagesImageName has not yet been implemented")
 	})
-	api.FlowerPostFlowersHandler = flower.PostFlowersHandlerFunc(func(params flower.PostFlowersParams, principal interface{}) middleware.Responder {
-		return middleware.NotImplemented("operation flower.PostFlowers has not yet been implemented")
-	})
 	api.ItemPostItemsHandler = item.PostItemsHandlerFunc(func(params item.PostItemsParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation item.PostItems has not yet been implemented")
 	})
 	api.ItemPostItemsNameImagesHandler = item.PostItemsNameImagesHandlerFunc(func(params item.PostItemsNameImagesParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation item.PostItemsNameImages has not yet been implemented")
-	})
-	api.FlowerPutFlowersNameHandler = flower.PutFlowersNameHandlerFunc(func(params flower.PutFlowersNameParams, principal interface{}) middleware.Responder {
-		return middleware.NotImplemented("operation flower.PutFlowersName has not yet been implemented")
 	})
 	api.ItemPutItemsNameHandler = item.PutItemsNameHandlerFunc(func(params item.PutItemsNameParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation item.PutItemsName has not yet been implemented")
@@ -100,6 +105,8 @@ func configureAPI(api *operations.SomesimAPI) http.Handler {
 	api.ItemPutItemsNameImagesImageNameHandler = item.PutItemsNameImagesImageNameHandlerFunc(func(params item.PutItemsNameImagesImageNameParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation item.PutItemsNameImagesImageName has not yet been implemented")
 	})
+
+	// User APIs
 	api.UserGetTokensHandler = user.GetTokensHandlerFunc(func(params user.GetTokensParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation user.GetTokensHandler has not yet been implemented")
 	})
