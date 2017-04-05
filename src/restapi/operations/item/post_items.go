@@ -7,19 +7,21 @@ import (
 	"net/http"
 
 	middleware "github.com/go-openapi/runtime/middleware"
+
+	"github.com/pocka/api.somesim/models"
 )
 
 // PostItemsHandlerFunc turns a function with the right signature into a post items handler
-type PostItemsHandlerFunc func(PostItemsParams, interface{}) middleware.Responder
+type PostItemsHandlerFunc func(PostItemsParams, *models.Principal) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn PostItemsHandlerFunc) Handle(params PostItemsParams, principal interface{}) middleware.Responder {
+func (fn PostItemsHandlerFunc) Handle(params PostItemsParams, principal *models.Principal) middleware.Responder {
 	return fn(params, principal)
 }
 
 // PostItemsHandler interface for that can handle valid post items params
 type PostItemsHandler interface {
-	Handle(PostItemsParams, interface{}) middleware.Responder
+	Handle(PostItemsParams, *models.Principal) middleware.Responder
 }
 
 // NewPostItems creates a new http.Handler for the post items operation
@@ -49,9 +51,9 @@ func (o *PostItems) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
-	var principal interface{}
+	var principal *models.Principal
 	if uprinc != nil {
-		principal = uprinc
+		principal = uprinc.(*models.Principal) // this is really a models.Principal, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

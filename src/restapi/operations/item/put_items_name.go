@@ -7,19 +7,21 @@ import (
 	"net/http"
 
 	middleware "github.com/go-openapi/runtime/middleware"
+
+	"github.com/pocka/api.somesim/models"
 )
 
 // PutItemsNameHandlerFunc turns a function with the right signature into a put items name handler
-type PutItemsNameHandlerFunc func(PutItemsNameParams, interface{}) middleware.Responder
+type PutItemsNameHandlerFunc func(PutItemsNameParams, *models.Principal) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn PutItemsNameHandlerFunc) Handle(params PutItemsNameParams, principal interface{}) middleware.Responder {
+func (fn PutItemsNameHandlerFunc) Handle(params PutItemsNameParams, principal *models.Principal) middleware.Responder {
 	return fn(params, principal)
 }
 
 // PutItemsNameHandler interface for that can handle valid put items name params
 type PutItemsNameHandler interface {
-	Handle(PutItemsNameParams, interface{}) middleware.Responder
+	Handle(PutItemsNameParams, *models.Principal) middleware.Responder
 }
 
 // NewPutItemsName creates a new http.Handler for the put items name operation
@@ -49,9 +51,9 @@ func (o *PutItemsName) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
-	var principal interface{}
+	var principal *models.Principal
 	if uprinc != nil {
-		principal = uprinc
+		principal = uprinc.(*models.Principal) // this is really a models.Principal, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

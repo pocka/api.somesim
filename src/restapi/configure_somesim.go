@@ -3,6 +3,8 @@ package restapi
 import (
 	"crypto/tls"
 	"net/http"
+	"strings"
+	//"encoding/base64"
 
 	errors "github.com/go-openapi/errors"
 	runtime "github.com/go-openapi/runtime"
@@ -15,6 +17,7 @@ import (
 	"github.com/pocka/api.somesim/restapi/operations/internal_api"
 	"github.com/pocka/api.somesim/restapi/operations/item"
 	"github.com/pocka/api.somesim/restapi/operations/user"
+	"github.com/pocka/api.somesim/models"
 )
 
 // This file is safe to edit. Once it exists it will not be overwritten
@@ -52,6 +55,36 @@ func configureAPI(api *operations.SomesimAPI) http.Handler {
 		return api.Context().RoutesHandler(builder)
 	}
 
+	api.BasicAuthAuth = func(user string, pass string) (*models.Principal, error) {
+		if user == runtimeConfig.AdminUser && pass == runtimeConfig.AdminPassword {
+			principal := models.Principal{
+				User: user,
+				TokenType: models.NoToken,
+				ExpiresIn: nil,
+				AuthType: "basic",
+			}
+
+			return &principal, nil
+		}
+		return nil, errors.New(401, "Invalid username or password")
+	}
+
+	api.BearerAuth = func(value string) (*models.Principal, error) {
+		// BASIC auth
+		if strings.Index(value, "Basic ") == 0 {
+			// If BASIC auth failed, api tries to this.
+			// (Because BASIC auth has 'Authorization' header too.
+			return nil, errors.New(401, "Invalid username or password")
+		}
+
+		// token auth
+		if strings.Index(value, "Bearer ") == 0 {
+			return nil, errors.New(501, "Token auth is not implemented")
+		}
+
+		return nil, errors.New(400, "Invalid Authorization header")
+	}
+
 	api.JSONConsumer = runtime.JSONConsumer()
 
 	api.JSONProducer = runtime.JSONProducer()
@@ -73,10 +106,10 @@ func configureAPI(api *operations.SomesimAPI) http.Handler {
 	api.FlowerGetFlowersNameHandler = flower.GetFlowersNameHandlerFunc(func(params flower.GetFlowersNameParams) middleware.Responder {
 		return middleware.NotImplemented("operation flower.GetFlowersName has not yet been implemented")
 	})
-	api.FlowerPostFlowersHandler = flower.PostFlowersHandlerFunc(func(params flower.PostFlowersParams, principal interface{}) middleware.Responder {
+	api.FlowerPostFlowersHandler = flower.PostFlowersHandlerFunc(func(params flower.PostFlowersParams, principal *models.Principal) middleware.Responder {
 		return middleware.NotImplemented("operation flower.PostFlowers has not yet been implemented")
 	})
-	api.FlowerPutFlowersNameHandler = flower.PutFlowersNameHandlerFunc(func(params flower.PutFlowersNameParams, principal interface{}) middleware.Responder {
+	api.FlowerPutFlowersNameHandler = flower.PutFlowersNameHandlerFunc(func(params flower.PutFlowersNameParams, principal *models.Principal) middleware.Responder {
 		return middleware.NotImplemented("operation flower.PutFlowersName has not yet been implemented")
 	})
 
@@ -93,24 +126,24 @@ func configureAPI(api *operations.SomesimAPI) http.Handler {
 	api.ItemGetItemsNameImagesImageNameHandler = item.GetItemsNameImagesImageNameHandlerFunc(func(params item.GetItemsNameImagesImageNameParams) middleware.Responder {
 		return middleware.NotImplemented("operation item.GetItemsNameImagesImageName has not yet been implemented")
 	})
-	api.ItemPostItemsHandler = item.PostItemsHandlerFunc(func(params item.PostItemsParams, principal interface{}) middleware.Responder {
+	api.ItemPostItemsHandler = item.PostItemsHandlerFunc(func(params item.PostItemsParams, principal *models.Principal) middleware.Responder {
 		return middleware.NotImplemented("operation item.PostItems has not yet been implemented")
 	})
-	api.ItemPostItemsNameImagesHandler = item.PostItemsNameImagesHandlerFunc(func(params item.PostItemsNameImagesParams, principal interface{}) middleware.Responder {
+	api.ItemPostItemsNameImagesHandler = item.PostItemsNameImagesHandlerFunc(func(params item.PostItemsNameImagesParams, principal *models.Principal) middleware.Responder {
 		return middleware.NotImplemented("operation item.PostItemsNameImages has not yet been implemented")
 	})
-	api.ItemPutItemsNameHandler = item.PutItemsNameHandlerFunc(func(params item.PutItemsNameParams, principal interface{}) middleware.Responder {
+	api.ItemPutItemsNameHandler = item.PutItemsNameHandlerFunc(func(params item.PutItemsNameParams, principal *models.Principal) middleware.Responder {
 		return middleware.NotImplemented("operation item.PutItemsName has not yet been implemented")
 	})
-	api.ItemPutItemsNameImagesImageNameHandler = item.PutItemsNameImagesImageNameHandlerFunc(func(params item.PutItemsNameImagesImageNameParams, principal interface{}) middleware.Responder {
+	api.ItemPutItemsNameImagesImageNameHandler = item.PutItemsNameImagesImageNameHandlerFunc(func(params item.PutItemsNameImagesImageNameParams, principal *models.Principal) middleware.Responder {
 		return middleware.NotImplemented("operation item.PutItemsNameImagesImageName has not yet been implemented")
 	})
 
 	// User APIs
-	api.UserGetTokensHandler = user.GetTokensHandlerFunc(func(params user.GetTokensParams, principal interface{}) middleware.Responder {
+	api.UserGetTokensHandler = user.GetTokensHandlerFunc(func(params user.GetTokensParams, principal *models.Principal) middleware.Responder {
 		return middleware.NotImplemented("operation user.GetTokensHandler has not yet been implemented")
 	})
-	api.UserGetTokensAccessTokenHandler = user.GetTokensAccessTokenHandlerFunc(func(params user.GetTokensAccessTokenParams, principal interface{}) middleware.Responder {
+	api.UserGetTokensAccessTokenHandler = user.GetTokensAccessTokenHandlerFunc(func(params user.GetTokensAccessTokenParams, principal *models.Principal) middleware.Responder {
 		return middleware.NotImplemented("operation user.GetTokensAccessTokenHandler has not yet been implemented")
 	})
 

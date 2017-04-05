@@ -10,19 +10,21 @@ import (
 	middleware "github.com/go-openapi/runtime/middleware"
 	strfmt "github.com/go-openapi/strfmt"
 	validate "github.com/go-openapi/validate"
+
+	"github.com/pocka/api.somesim/models"
 )
 
 // GetTokensHandlerFunc turns a function with the right signature into a get tokens handler
-type GetTokensHandlerFunc func(GetTokensParams, interface{}) middleware.Responder
+type GetTokensHandlerFunc func(GetTokensParams, *models.Principal) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn GetTokensHandlerFunc) Handle(params GetTokensParams, principal interface{}) middleware.Responder {
+func (fn GetTokensHandlerFunc) Handle(params GetTokensParams, principal *models.Principal) middleware.Responder {
 	return fn(params, principal)
 }
 
 // GetTokensHandler interface for that can handle valid get tokens params
 type GetTokensHandler interface {
-	Handle(GetTokensParams, interface{}) middleware.Responder
+	Handle(GetTokensParams, *models.Principal) middleware.Responder
 }
 
 // NewGetTokens creates a new http.Handler for the get tokens operation
@@ -55,9 +57,9 @@ func (o *GetTokens) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
-	var principal interface{}
+	var principal *models.Principal
 	if uprinc != nil {
-		principal = uprinc
+		principal = uprinc.(*models.Principal) // this is really a models.Principal, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

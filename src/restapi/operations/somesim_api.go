@@ -18,6 +18,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
+	"github.com/pocka/api.somesim/models"
 	"github.com/pocka/api.somesim/restapi/operations/flower"
 	"github.com/pocka/api.somesim/restapi/operations/internal_api"
 	"github.com/pocka/api.somesim/restapi/operations/item"
@@ -64,38 +65,38 @@ func NewSomesimAPI(spec *loads.Document) *SomesimAPI {
 		ItemGetItemsNameImagesImageNameHandler: item.GetItemsNameImagesImageNameHandlerFunc(func(params item.GetItemsNameImagesImageNameParams) middleware.Responder {
 			return middleware.NotImplemented("operation ItemGetItemsNameImagesImageName has not yet been implemented")
 		}),
-		UserGetTokensHandler: user.GetTokensHandlerFunc(func(params user.GetTokensParams, principal interface{}) middleware.Responder {
+		UserGetTokensHandler: user.GetTokensHandlerFunc(func(params user.GetTokensParams, principal *models.Principal) middleware.Responder {
 			return middleware.NotImplemented("operation UserGetTokens has not yet been implemented")
 		}),
-		UserGetTokensAccessTokenHandler: user.GetTokensAccessTokenHandlerFunc(func(params user.GetTokensAccessTokenParams, principal interface{}) middleware.Responder {
+		UserGetTokensAccessTokenHandler: user.GetTokensAccessTokenHandlerFunc(func(params user.GetTokensAccessTokenParams, principal *models.Principal) middleware.Responder {
 			return middleware.NotImplemented("operation UserGetTokensAccessToken has not yet been implemented")
 		}),
-		FlowerPostFlowersHandler: flower.PostFlowersHandlerFunc(func(params flower.PostFlowersParams, principal interface{}) middleware.Responder {
+		FlowerPostFlowersHandler: flower.PostFlowersHandlerFunc(func(params flower.PostFlowersParams, principal *models.Principal) middleware.Responder {
 			return middleware.NotImplemented("operation FlowerPostFlowers has not yet been implemented")
 		}),
-		ItemPostItemsHandler: item.PostItemsHandlerFunc(func(params item.PostItemsParams, principal interface{}) middleware.Responder {
+		ItemPostItemsHandler: item.PostItemsHandlerFunc(func(params item.PostItemsParams, principal *models.Principal) middleware.Responder {
 			return middleware.NotImplemented("operation ItemPostItems has not yet been implemented")
 		}),
-		ItemPostItemsNameImagesHandler: item.PostItemsNameImagesHandlerFunc(func(params item.PostItemsNameImagesParams, principal interface{}) middleware.Responder {
+		ItemPostItemsNameImagesHandler: item.PostItemsNameImagesHandlerFunc(func(params item.PostItemsNameImagesParams, principal *models.Principal) middleware.Responder {
 			return middleware.NotImplemented("operation ItemPostItemsNameImages has not yet been implemented")
 		}),
-		FlowerPutFlowersNameHandler: flower.PutFlowersNameHandlerFunc(func(params flower.PutFlowersNameParams, principal interface{}) middleware.Responder {
+		FlowerPutFlowersNameHandler: flower.PutFlowersNameHandlerFunc(func(params flower.PutFlowersNameParams, principal *models.Principal) middleware.Responder {
 			return middleware.NotImplemented("operation FlowerPutFlowersName has not yet been implemented")
 		}),
-		ItemPutItemsNameHandler: item.PutItemsNameHandlerFunc(func(params item.PutItemsNameParams, principal interface{}) middleware.Responder {
+		ItemPutItemsNameHandler: item.PutItemsNameHandlerFunc(func(params item.PutItemsNameParams, principal *models.Principal) middleware.Responder {
 			return middleware.NotImplemented("operation ItemPutItemsName has not yet been implemented")
 		}),
-		ItemPutItemsNameImagesImageNameHandler: item.PutItemsNameImagesImageNameHandlerFunc(func(params item.PutItemsNameImagesImageNameParams, principal interface{}) middleware.Responder {
+		ItemPutItemsNameImagesImageNameHandler: item.PutItemsNameImagesImageNameHandlerFunc(func(params item.PutItemsNameImagesImageNameParams, principal *models.Principal) middleware.Responder {
 			return middleware.NotImplemented("operation ItemPutItemsNameImagesImageName has not yet been implemented")
 		}),
 
 		// Applies when the Authorization header is set with the Basic scheme
-		BasicAuthAuth: func(user string, pass string) (interface{}, error) {
+		BasicAuthAuth: func(user string, pass string) (*models.Principal, error) {
 			return nil, errors.NotImplemented("basic auth  (BasicAuth) has not yet been implemented")
 		},
 
 		// Applies when the "Authorization" header is set
-		BearerAuth: func(token string) (interface{}, error) {
+		BearerAuth: func(token string) (*models.Principal, error) {
 			return nil, errors.NotImplemented("api key auth (Bearer) Authorization from header param [Authorization] has not yet been implemented")
 		},
 	}
@@ -124,11 +125,11 @@ type SomesimAPI struct {
 
 	// BasicAuthAuth registers a function that takes username and password and returns a principal
 	// it performs authentication with basic auth
-	BasicAuthAuth func(string, string) (interface{}, error)
+	BasicAuthAuth func(string, string) (*models.Principal, error)
 
 	// BearerAuth registers a function that takes a token and returns a principal
 	// it performs authentication based on an api key Authorization provided in the header
-	BearerAuth func(string) (interface{}, error)
+	BearerAuth func(string) (*models.Principal, error)
 
 	// InternalAPIGetDocsHandler sets the operation handler for the get docs operation
 	InternalAPIGetDocsHandler internal_api.GetDocsHandler
@@ -326,11 +327,15 @@ func (o *SomesimAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) m
 
 		case "BasicAuth":
 			_ = scheme
-			result[name] = security.BasicAuth(o.BasicAuthAuth)
+			result[name] = security.BasicAuth(func(username, password string) (interface{}, error) {
+				return o.BasicAuthAuth(username, password)
+			})
 
 		case "Bearer":
 
-			result[name] = security.APIKeyAuth(scheme.Name, scheme.In, o.BearerAuth)
+			result[name] = security.APIKeyAuth(scheme.Name, scheme.In, func(token string) (interface{}, error) {
+				return o.BearerAuth(token)
+			})
 
 		}
 	}

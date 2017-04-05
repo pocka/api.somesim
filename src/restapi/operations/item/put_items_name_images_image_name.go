@@ -7,19 +7,21 @@ import (
 	"net/http"
 
 	middleware "github.com/go-openapi/runtime/middleware"
+
+	"github.com/pocka/api.somesim/models"
 )
 
 // PutItemsNameImagesImageNameHandlerFunc turns a function with the right signature into a put items name images image name handler
-type PutItemsNameImagesImageNameHandlerFunc func(PutItemsNameImagesImageNameParams, interface{}) middleware.Responder
+type PutItemsNameImagesImageNameHandlerFunc func(PutItemsNameImagesImageNameParams, *models.Principal) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn PutItemsNameImagesImageNameHandlerFunc) Handle(params PutItemsNameImagesImageNameParams, principal interface{}) middleware.Responder {
+func (fn PutItemsNameImagesImageNameHandlerFunc) Handle(params PutItemsNameImagesImageNameParams, principal *models.Principal) middleware.Responder {
 	return fn(params, principal)
 }
 
 // PutItemsNameImagesImageNameHandler interface for that can handle valid put items name images image name params
 type PutItemsNameImagesImageNameHandler interface {
-	Handle(PutItemsNameImagesImageNameParams, interface{}) middleware.Responder
+	Handle(PutItemsNameImagesImageNameParams, *models.Principal) middleware.Responder
 }
 
 // NewPutItemsNameImagesImageName creates a new http.Handler for the put items name images image name operation
@@ -49,9 +51,9 @@ func (o *PutItemsNameImagesImageName) ServeHTTP(rw http.ResponseWriter, r *http.
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
-	var principal interface{}
+	var principal *models.Principal
 	if uprinc != nil {
-		principal = uprinc
+		principal = uprinc.(*models.Principal) // this is really a models.Principal, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

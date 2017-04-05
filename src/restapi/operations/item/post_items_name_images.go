@@ -7,19 +7,21 @@ import (
 	"net/http"
 
 	middleware "github.com/go-openapi/runtime/middleware"
+
+	"github.com/pocka/api.somesim/models"
 )
 
 // PostItemsNameImagesHandlerFunc turns a function with the right signature into a post items name images handler
-type PostItemsNameImagesHandlerFunc func(PostItemsNameImagesParams, interface{}) middleware.Responder
+type PostItemsNameImagesHandlerFunc func(PostItemsNameImagesParams, *models.Principal) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn PostItemsNameImagesHandlerFunc) Handle(params PostItemsNameImagesParams, principal interface{}) middleware.Responder {
+func (fn PostItemsNameImagesHandlerFunc) Handle(params PostItemsNameImagesParams, principal *models.Principal) middleware.Responder {
 	return fn(params, principal)
 }
 
 // PostItemsNameImagesHandler interface for that can handle valid post items name images params
 type PostItemsNameImagesHandler interface {
-	Handle(PostItemsNameImagesParams, interface{}) middleware.Responder
+	Handle(PostItemsNameImagesParams, *models.Principal) middleware.Responder
 }
 
 // NewPostItemsNameImages creates a new http.Handler for the post items name images operation
@@ -51,9 +53,9 @@ func (o *PostItemsNameImages) ServeHTTP(rw http.ResponseWriter, r *http.Request)
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
-	var principal interface{}
+	var principal *models.Principal
 	if uprinc != nil {
-		principal = uprinc
+		principal = uprinc.(*models.Principal) // this is really a models.Principal, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

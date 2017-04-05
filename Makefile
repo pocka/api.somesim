@@ -61,4 +61,4 @@ swagger/validate: docs/swagger.yml
 
 .PHONY: swagger/generate
 swagger/generate: docs/swagger.yml
-	$(DOCKER_RUN) -w '/go/src/github.com/pocka/api.somesim' $(DOCKER_LABEL_DEVELOP) swagger generate server -f /work/$< -A somesim --exclude-main -t ./
+	$(DOCKER_RUN) -w '/go/src/github.com/pocka/api.somesim' $(DOCKER_LABEL_DEVELOP) swagger generate server -f /work/$< -A somesim -P models.Principal -t ./

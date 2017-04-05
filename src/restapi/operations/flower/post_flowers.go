@@ -7,19 +7,21 @@ import (
 	"net/http"
 
 	middleware "github.com/go-openapi/runtime/middleware"
+
+	"github.com/pocka/api.somesim/models"
 )
 
 // PostFlowersHandlerFunc turns a function with the right signature into a post flowers handler
-type PostFlowersHandlerFunc func(PostFlowersParams, interface{}) middleware.Responder
+type PostFlowersHandlerFunc func(PostFlowersParams, *models.Principal) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn PostFlowersHandlerFunc) Handle(params PostFlowersParams, principal interface{}) middleware.Responder {
+func (fn PostFlowersHandlerFunc) Handle(params PostFlowersParams, principal *models.Principal) middleware.Responder {
 	return fn(params, principal)
 }
 
 // PostFlowersHandler interface for that can handle valid post flowers params
 type PostFlowersHandler interface {
-	Handle(PostFlowersParams, interface{}) middleware.Responder
+	Handle(PostFlowersParams, *models.Principal) middleware.Responder
 }
 
 // NewPostFlowers creates a new http.Handler for the post flowers operation
@@ -50,9 +52,9 @@ func (o *PostFlowers) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
-	var principal interface{}
+	var principal *models.Principal
 	if uprinc != nil {
-		principal = uprinc
+		principal = uprinc.(*models.Principal) // this is really a models.Principal, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
