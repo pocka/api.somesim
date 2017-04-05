@@ -27,12 +27,5 @@ API for MoE-Somesim
 実際にデプロイした場合は以下の様な感じで起動して下さい。
 
 ```sh
-docker run \
-	--rm \
-	-p <リッスンするポート>:443 \
-	-v <証明書のパス>:/work/.crt/tls.crt \
-	-v <秘密鍵のパス>:/work/.crt/tls.key \
-	pocka/api.somesim:v1 \
-		--tls-certificate=/work/.crt/tls.crt \
-		--tls-key=/work/.crt/tls.key
+docker run -p <リッスンするポート>:80 pocka/api.somesim:v1
 ```
