@@ -8,4 +8,4 @@ ADD docs /work/docs
 
 WORKDIR /work
 
-ENTRYPOINT ["/work/somesim", "--tls-port", "443", "--tls-host", "0.0.0.0"]
+ENTRYPOINT ["/work/somesim", "--port", "80", "--host", "0.0.0.0"]
