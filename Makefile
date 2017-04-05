@@ -11,21 +11,11 @@ default: all
 all: container/server
 
 .PHONY: init
-init: .crt
+init:
 	mkdir -p dist
-
-CRT_DIR = $(shell pwd)/.crt
-CRT_NAME = testserver
-.crt:
-	mkdir -p .crt
-	cd /etc/pki/tls/certs && \
-	make $(CRT_DIR)/$(CRT_NAME).crt
-	openssl rsa -in $(CRT_DIR)/$(CRT_NAME).key -out $(CRT_DIR)/$(CRT_NAME).key
-	chmod +r .crt/*
 
 .PHONY: clean
 clean:
-	rm -rf .crt
 	rm -rf dist
 
 # Docker rules
