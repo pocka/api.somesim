@@ -23,7 +23,8 @@ import (
 
 var runtimeConfig = struct {
 	DBAddress string `long:"db-address" short:"d" description:"Address for db server" default:"db"`
-	Password string `long:"password" description:"Password for admin user" default:"pass"`
+	AdminPassword string `long:"admin-password" description:"Password for admin user" default:"pass"`
+	AdminUser string `long:"admin-user" description:"Administrator user name" default:"admin"`
 }{}
 
 func configureFlags(api *operations.SomesimAPI) {
